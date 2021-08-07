@@ -9,7 +9,10 @@ router.get('/', (req, res) => {
   Tag.findAll({
     include: [
       {
-        model: Product
+        model: Product,
+        attributes: ['id', 'product_name'],
+        through: ProductTag,
+        as: 'tags'
       }
     ]
   })
@@ -26,13 +29,22 @@ router.get('/:id', (req, res) => {
   Tag.findOne({
     where: {
       id: req.params.id
-    }
+    },
+    include: [
+      {
+        model: Product,
+        attributes: ['id', 'product_name'],
+        through: ProductTag,
+        as: 'tags'
+      }
+    ]
   })
   .then(data => {
     if (!data) {
-      res.status(404).json({ message: 'No tag found with this id' });
+      res.status(404).json({ message: 'No category found with this id' });
       return;
     }
+    res.json(data);
   })
   .catch(err => {
     console.log(err);
@@ -56,7 +68,7 @@ router.put('/:id', (req, res) => {
   // update a tag's name by its `id` value
   Tag.update(req.body, {
     where: {
-      id: req.body.id
+      id: req.params.id
     } 
   })
   .then(data => {
@@ -66,6 +78,10 @@ router.put('/:id', (req, res) => {
     }
     res.json(data);
   })
+  .catch(err => {
+    console.log(err);
+    res.status(500).json(err);
+  });
 });
 
 router.delete('/:id', (req, res) => {
@@ -80,6 +96,7 @@ router.delete('/:id', (req, res) => {
       res.status(404).json({ message: 'No tag found with this id' });
       return;
     }
+    res.json(data);
   })
   .catch(err => {
     console.log(err);
